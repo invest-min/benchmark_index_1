@@ -2,7 +2,6 @@
 # Prepare a raw data file under the data directory
 # "raw_seoul.xlsx" is the raw data file in this class
 # It contains transaction cases of commercial buildings in Seoul
-# Prepare "far_limit.xlsx" regulations under the data directory
 
 # Read data and change the names of variables
 
@@ -15,7 +14,7 @@ names(raw) <- c("dong", "jiphap", "jibun", "doro",
                 "price_t", "floors", "ym", "day",
                 "strata", "completion",
                 "cancel", "type", "agent")
-str(raw)
+nrow(raw) # 261,290 by 2023.03
 
 # Remove useless information
 
@@ -28,8 +27,10 @@ raw <- raw %>%
   filter(jiphap == "일반") %>% 
   filter(is.na(strata)) %>%
   select(-c(jiphap, floors, strata, cancel, type, agent))
+nrow(raw) # 49,254
 
-str(raw)
+raw <- unique(raw)
+nrow(raw) # 47,882
 
 # Time variables
 
