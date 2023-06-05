@@ -1,3 +1,5 @@
+rm(list = ls())
+
 # Create a directory named "data" under the working directory
 # Prepare a raw data file under the data directory
 # "raw_seoul.xlsx" is the raw data file in this class
@@ -14,7 +16,7 @@ names(raw) <- c("dong", "jiphap", "jibun", "doro",
                 "price_t", "floors", "ym", "day",
                 "strata", "completion",
                 "cancel", "type", "agent")
-nrow(raw) # 261,290 by 2023.03
+nrow(raw)
 
 # Remove useless information
 
@@ -27,10 +29,10 @@ raw <- raw %>%
   filter(jiphap == "일반") %>% 
   filter(is.na(strata)) %>%
   select(-c(jiphap, floors, strata, cancel, type, agent))
-nrow(raw) # 49,254
+nrow(raw)
 
 raw <- unique(raw)
-nrow(raw) # 47,882
+nrow(raw)
 
 # Time variables
 
@@ -64,6 +66,8 @@ raw$year <- as.numeric(raw$year)
 raw$month <- as.numeric(raw$month)
 raw$day <- as.numeric(raw$day)
 
+raw$yq <- factor(raw$yq)
+
 str(raw)
 
 # Location variables
@@ -85,6 +89,9 @@ raw <- raw %>%
            jibun, doro,
            .after = day)
 
+raw$gu <- factor(raw$gu)
+raw$dong <- factor(raw$dong)
+
 str(raw)
 
 # Zone, use and road
@@ -94,21 +101,44 @@ raw <- raw %>%
   filter(!is.na(zone))
 
 with(raw, table(zone))
+
+raw <- raw %>%
+  filter(zone != "개발제한구역" &
+         zone != "계획관리" &
+         zone != "기타" &
+         zone != "용도미지정" &
+         zone != "일반공업" &
+         zone != "일반주거" &
+         zone != "전용공업" &
+         zone != "유통상업" )
+
+with(raw, table(zone))
+
 raw$zone[raw$zone == "제1종전용주거"] <- "전용주거"
 raw$zone[raw$zone == "제2종전용주거"] <- "전용주거"
 raw$zone[raw$zone == "제1종일반주거"] <- "일반주거1"
 raw$zone[raw$zone == "제2종일반주거"] <- "일반주거2"
 raw$zone[raw$zone == "제3종일반주거"] <- "일반주거3"
-raw$zone[raw$zone == "유통상업"] <- "근린상업"
-raw$zone[raw$zone == "보전녹지"] <- "자연녹지"
-raw$zone[raw$zone == "생산녹지"] <- "자연녹지"
-raw$zone[raw$zone == "개발제한구역"] <- "개발제한"
+
+raw$zone <- factor(raw$zone,
+                   levels = c("전용주거",
+                              "일반주거1",
+                              "일반주거2",
+                              "일반주거3",
+                              "준주거",
+                              "근린상업",
+                              "일반상업",
+                              "중심상업",
+                              "준공업",
+                              "자연녹지"))
+summary(raw$zone)
 
 far_limit <- read_excel("data/zones_far.xlsx", sheet = "limit")
 raw <- raw %>% 
   left_join(far_limit, by = "zone") %>% 
   filter(!is.na(far_norm)) %>% 
   filter(!is.na(far_hist))
+
 
 with(raw, sum(is.na(use)))
 raw <- raw %>%
@@ -126,6 +156,15 @@ use <- use %>% arrange(no_use)
 raw <- raw %>% 
   left_join(use, by = "use")
 
+raw$use <- factor(raw$use,
+                  levels = c("근생1",
+                             "근생2",
+                             "업무",
+                             "판매",
+                             "숙박",
+                             "교육연구",
+                             "기타"))
+
 rm(use)
 
 with(raw, sum(is.na(road)))
@@ -137,10 +176,11 @@ raw <- raw %>%
   filter(road != "-")
 raw$road <- factor(raw$road,
                    ordered = T,
-                   labels = c("8m미만",
+                   levels = c("8m미만",
                               "12m미만",
                               "25m미만",
                               "25m이상"))
+summary(raw$road)
 
 raw <- raw %>% 
   relocate(no_zone, zone, hist, far_norm, far_hist,
@@ -170,11 +210,25 @@ str(raw)
 # Completion
 
 raw$completion <- as.numeric(raw$completion)
-sum(is.na(raw$completion)) # many NAs
-with(raw, table(completion)) # many weird years such as 0, 1900...
+sum(is.na(raw$completion))
+with(raw, table(completion))
 
 raw <- raw %>% 
-  relocate(completion, .after = far)
+  filter(!is.na(completion)) %>% 
+  filter(completion >= 1954)
+
+sum(is.na(raw$completion))
+with(raw, table(completion))
+
+raw <- raw %>% 
+  mutate(age = year - completion) %>% 
+  relocate(completion, age, .after = far)
+
+summary(raw$age)
+sum(raw$age == -1)
+
+raw <- raw %>% 
+  filter(age >= 0)
 
 str(raw)
 
@@ -195,15 +249,5 @@ raw <- raw %>%
 raw <- raw %>% 
   mutate(price_l = price_t / area_l,
          price_ll = log(price_l))
-
-str(raw)
-
-# Unique
-
-num_t <- nrow(raw)
-raw <- unique(raw)
-nrow(raw) / num_t
-
-rm(num_t)
 
 str(raw)
