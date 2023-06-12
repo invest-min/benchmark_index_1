@@ -29,7 +29,7 @@ with(raw, table(size))
 library(dplyr)
 
 tar <- raw %>%
-  filter(size == "little") # Set the target
+  filter(size != "under" & size != "tiny")
 
 summary(tar$area_b)
 
@@ -127,7 +127,7 @@ ggplot(tar, aes(x = reorder(zone, no_zone))) +
 
 # Outlier by price (log of unit price)
 
-range_price <- 3 # X IQR
+range_price <- 1.5 # X IQR
 
 ggplot(tar, aes(x = price_t)) +
   geom_histogram(bins = 100) +

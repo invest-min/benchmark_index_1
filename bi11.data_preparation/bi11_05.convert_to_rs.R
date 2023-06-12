@@ -1,6 +1,7 @@
 # Convert data into repeat sales form
 
 str(tar)
+
 hp <- tar # data for hedonic price model
 
 library(dplyr)
