@@ -1,6 +1,7 @@
 # Convert data into repeat sales form
 
 str(tar)
+hp <- tar # data for hedonic price model
 
 library(dplyr)
 
@@ -72,7 +73,7 @@ str(num_rp)
 num_rp %>% 
   ggplot(aes(x = q, y = num_rp)) +
   geom_col()+
-  labs(title = "Number of Repeat Sales (Seoul)",
+  labs(title = "Number of Repeat Sales in Seoul",
        x = "quarter",
        y = "repeat sales")
 
@@ -80,7 +81,7 @@ num_rp %>%
   ggplot(aes(x = q, y = num_rp)) +
   geom_col() +
   facet_wrap(~region, ncol = 1) +
-  labs(title = "Number of Repeat Sales (Regions)",
+  labs(title = "Number of Repeat Sales by Region",
        x = "quarter",
        y = "repeat sales")
 
@@ -95,4 +96,4 @@ for(i in 1:max(tar$q)) {
                                  ifelse(rp$q2 == i, 1, 0))
 }
 
-str(rp)
+str(rp) # data for repeat sales model

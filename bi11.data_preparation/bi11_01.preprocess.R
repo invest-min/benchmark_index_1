@@ -4,6 +4,7 @@ rm(list = ls())
 # Prepare a raw data file under the data directory
 # "raw_seoul.xlsx" is the raw data file in this class
 # It contains transaction cases of commercial buildings in Seoul
+# from http://rtdown.molit.go.kr/
 
 # Read data and change the names of variables
 
@@ -13,7 +14,7 @@ str(raw)
 
 names(raw) <- c("dong", "jiphap", "jibun", "doro",
                 "zone", "use", "road", "area_b", "area_l",
-                "price_t", "floors", "ym", "day",
+                "price_t", "floor", "ym", "day",
                 "strata", "completion",
                 "cancel", "type", "agent")
 nrow(raw)
@@ -22,13 +23,14 @@ nrow(raw)
 
 library(dplyr)
 
-with(raw, table(jiphap, is.na(floors)))
-with(raw, table(strata))
+with(raw, table(jiphap))
+with(raw, table(jiphap, is.na(floor)))
+with(raw, table(jiphap, strata))
 
 raw <- raw %>%
   filter(jiphap == "일반") %>% 
   filter(is.na(strata)) %>%
-  select(-c(jiphap, floors, strata, cancel, type, agent))
+  select(-c(jiphap, floor, strata, cancel, type, agent))
 nrow(raw)
 
 raw <- unique(raw)
@@ -70,7 +72,7 @@ raw$yq <- factor(raw$yq)
 
 str(raw)
 
-# Location variables
+# Locational variables
 
 raw$dong <- str_sub(raw$dong, 7)
 raw$gu <- str_split(raw$dong, " ", simplify = T)[, 1]
@@ -91,8 +93,6 @@ raw <- raw %>%
 
 raw$gu <- factor(raw$gu)
 raw$dong <- factor(raw$dong)
-
-str(raw)
 
 # Zone, use and road
 
@@ -186,8 +186,6 @@ raw <- raw %>%
   relocate(no_zone, zone, hist, far_norm, far_hist,
            no_use, use, road, .after = doro)
 
-str(raw)
-
 # Area and far
 
 raw$area_b <- as.numeric(raw$area_b)
@@ -205,8 +203,6 @@ raw$far <- raw$area_b / raw$area_l
 raw <- raw %>% 
   relocate(area_b, area_l, far, .after = road)
 
-str(raw)
-
 # Completion
 
 raw$completion <- as.numeric(raw$completion)
@@ -215,22 +211,17 @@ with(raw, table(completion))
 
 raw <- raw %>% 
   filter(!is.na(completion)) %>% 
-  filter(completion >= 1954)
+  filter(completion >= 1955)
 
 sum(is.na(raw$completion))
 with(raw, table(completion))
 
 raw <- raw %>% 
   mutate(age = year - completion) %>% 
+  filter(age >= 0) %>% 
   relocate(completion, age, .after = far)
 
 summary(raw$age)
-sum(raw$age == -1)
-
-raw <- raw %>% 
-  filter(age >= 0)
-
-str(raw)
 
 # Price
 
@@ -249,5 +240,3 @@ raw <- raw %>%
 raw <- raw %>% 
   mutate(price_l = price_t / area_l,
          price_ll = log(price_l))
-
-str(raw)

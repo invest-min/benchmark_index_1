@@ -8,7 +8,7 @@ num_tr_seoul <- raw %>%
   ungroup()
 
 num_tr_region <- raw %>% 
-  group_by(q, no_region, region) %>% 
+  group_by(q, region) %>% 
   summarise(num_tr = n()) %>%
   ungroup()
 
@@ -16,12 +16,12 @@ library(ggplot2)
 
 ggplot(num_tr_seoul, aes(x = q, y = num_tr)) +
   geom_col() +
-  labs(title = "Number of Transactions (Seoul)",
+  labs(title = "Number of Transactions in Seoul",
        x = "quarter",
        y = "transactions")
 
 ggplot(num_tr_region, aes(x = q, y = num_tr, col = region)) +
-  geom_line() +
+  geom_line(size = 0.7) +
   labs(title = "Number of Transactions by Region",
        x = "quarter",
        y = "transactions")
@@ -53,8 +53,6 @@ ggplot(raw, aes(x = reorder(use, no_use))) +
        y = "transactions")
 
 # Road
-
-summary(raw$road)
 
 with(raw, table(region, road))
 ggplot(raw, aes(x = reorder(region, no_region), fill = road)) +

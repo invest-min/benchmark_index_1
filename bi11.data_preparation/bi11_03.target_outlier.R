@@ -37,8 +37,6 @@ table(tar$region)
 table(tar$zone)
 table(tar$use)
 
-str(tar)
-
 library(ggplot2)
 
 ggplot(tar, aes(x = area_b)) +
@@ -80,8 +78,6 @@ ggplot(tar, aes(x = area_l)) +
        x = "area of land",
        y = "transactions")
 
-str(tar)
-
 # Outlier by far
 
 summary(tar$far)
@@ -102,10 +98,10 @@ ggplot(tar, aes(x = reorder(zone, no_zone))) +
        x = "zone",
        y = "far")
 
-sum(tar$far < 1/3)
+sum(tar$far < 0.5)
 sum(tar$far > 15)
 
-min_far <- 1/3
+min_far <- 0.5
 max_far <- 15
 
 tar <- tar %>%
@@ -128,8 +124,6 @@ ggplot(tar, aes(x = reorder(zone, no_zone))) +
   labs(title = "FAR by Zone",
        x = "zone",
        y = "far")
-
-str(tar)
 
 # Outlier by price (log of unit price)
 
