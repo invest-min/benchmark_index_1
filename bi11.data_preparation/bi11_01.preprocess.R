@@ -75,8 +75,8 @@ str(raw)
 raw$dong <- str_sub(raw$dong, 7)
 raw$gu <- str_split(raw$dong, " ", simplify = T)[, 1]
 
-cd_gu <- read_excel("data/law_gu_dong.xlsx", sheet = "gu")
-cd_dong <- read_excel("data/law_gu_dong.xlsx", sheet = "dong")
+cd_gu <- read_excel("data/cd_law.xlsx", sheet = "gu")
+cd_dong <- read_excel("data/cd_law.xlsx", sheet = "dong")
 
 raw <- raw %>% 
   left_join(cd_gu, by = "gu") %>% 
