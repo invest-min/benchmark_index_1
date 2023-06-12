@@ -39,14 +39,12 @@ nrow(raw)
 # Time variables
 
 library(stringr)
-
 raw$year <- str_sub(raw$ym, 1, 4)
 raw$month <- str_sub(raw$ym, 5, 6)
 raw$t <- str_c(raw$year, raw$month, raw$day, sep="-")
 raw$t <- as.Date(raw$t)
 
 library(lubridate)
-
 raw$quarter <- quarter(raw$t)
 raw$yq <- str_c(raw$year, raw$quarter, sep="q")
 raw$yq <- str_sub(raw$yq, 3, -1)
@@ -77,8 +75,8 @@ str(raw)
 raw$dong <- str_sub(raw$dong, 7)
 raw$gu <- str_split(raw$dong, " ", simplify = T)[, 1]
 
-cd_gu <- read_excel("data/cd_law.xlsx", sheet = "gu")
-cd_dong <- read_excel("data/cd_law.xlsx", sheet = "dong")
+cd_gu <- read_excel("data/law_gu_dong.xlsx", sheet = "gu")
+cd_dong <- read_excel("data/law_gu_dong.xlsx", sheet = "dong")
 
 raw <- raw %>% 
   left_join(cd_gu, by = "gu") %>% 
@@ -87,7 +85,7 @@ raw <- raw %>%
 raw <- raw %>% 
   relocate(no_region, region,
            no_gu, cd_gu, gu,
-           no_dong, cd_dong, dong,
+           no_dong, cd_dong, dong, hist,
            jibun, doro,
            .after = day)
 
